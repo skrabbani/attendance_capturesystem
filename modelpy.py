@@ -29,34 +29,35 @@ valid_path = 'E:/Face recognisation project/testset'
 # add preprocessing layer to the front of VGG
 vgg = VGG16(input_shape=IMAGE_SIZE + [3], weights='imagenet', include_top=False)
 
-# don't train existing weights
+# not training the existing weights
 for layer in vgg.layers:
   layer.trainable = False
   
 ##train_labels = to_categorical(train_labels)
   
-  # useful for getting number of classes
+  # getting number of classes
 folders = glob('E:/Face recognisation project/trainset')
   
 
-# our layers - you can add more if you want
+# flattening the layers
 x = Flatten()(vgg.output)
-# x = Dense(1000, activation='relu')(x)
+
 prediction = Dense(output_dim = 4,  activation='softmax')(x)
 
-# create a model object
+# creating a model object
 model = Model(inputs=vgg.input, outputs=prediction)
 
-# view the structure of the model
+# to view the structure of the model if needed
 model.summary()
 
-# tell the model what cost and optimization method to use
+# Compiling the model
 model.compile(
   loss='categorical_crossentropy',
   optimizer='adam',
   metrics=['accuracy']
 )
 
+# importing the ImageDataGenerator to view the classes and the images
 
 from keras.preprocessing.image import ImageDataGenerator
 
@@ -77,13 +78,7 @@ test_set = test_datagen.flow_from_directory('E:/Face recognisation project/train
                                             batch_size = 32,
                                             class_mode = 'categorical')
  
-'''r=model.fit_generator(training_set,
-                         samples_per_epoch = 8000,
-                         nb_epoch = 5,
-                         validation_data = test_set,
-                         nb_val_samples = 2000)'''
-
-# fit the model
+# fitting the model
 r = model.fit_generator(
   training_set,
   validation_data=test_set,
@@ -91,20 +86,23 @@ r = model.fit_generator(
   steps_per_epoch=len(training_set),
   validation_steps=len(test_set)
 )
-# loss
+
+# plotting the loss
 plt.plot(r.history['loss'], label='train loss')
 plt.plot(r.history['val_loss'], label='val loss')
 plt.legend()
 plt.show()
 plt.savefig('LossVal_loss')
 
-# accuracies
+# plotting the accuracies
 plt.plot(r.history['accuracy'], label='train accuracy')
 plt.plot(r.history['val_accuracy'], label='val accuracy')
 plt.legend()
 plt.show()
 plt.savefig('AccVal_accuracy')
 
+
+# saving the final model
 import tensorflow as tf
 
 from keras.models import load_model
